@@ -1,13 +1,14 @@
 const Carousel = () => {
   return (
     <div className="px-[65px]">
-      <div className=" flex items-center justify-center  absolute h-[150px] w-[150px]">
+      <div className=" flex items-center justify-center  absolute h-[100px] ">
         <img src="/assets/icon.png" />
       </div>
 
-      <img src="/assets/border.png" className="absolute z-[2]" alt="" />
+     
 
-      <div className="w-full h-auto relative">
+      <div className="w-full h-auto relative z-[2]">
+         <img src="/assets/border.png" className="absolute z-[2] w-auto " alt="" />
         <img
           src="/assets/header.png"
           alt="Banner principal"
