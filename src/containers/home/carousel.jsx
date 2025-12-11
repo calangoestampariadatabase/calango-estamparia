@@ -25,14 +25,16 @@ const Carousel = () => {
         return;
       }
 
+      // base pública do bucket
       const base =
         process.env.NEXT_PUBLIC_SUPABASE_URL +
         "/storage/v1/object/public/carousel/";
 
+      // usa o updated_at como quebra de cache
       const updated = data
         .filter((file) => /\.(jpg|jpeg|png|webp)$/i.test(file.name))
         .map((file) => ({
-          image: `${base}${file.name}?v=${Date.now()}`,
+          image: `${base}${file.name}?v=${new Date(file.updated_at).getTime()}`,
         }));
 
       setImages(updated);
