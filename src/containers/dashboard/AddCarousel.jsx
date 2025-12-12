@@ -55,9 +55,7 @@ const AddCarousel = () => {
     }
 
     // Gera URL SEM cache usando timestamp novo
-    const { data } = supabase.storage
-      .from("carousel")
-      .getPublicUrl(filePath);
+    const { data } = supabase.storage.from("carousel").getPublicUrl(filePath);
 
     const newImages = [...images];
     newImages[index] = `${data.publicUrl}?refresh=${Date.now()}`;
@@ -82,21 +80,20 @@ const AddCarousel = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 ">
       <h2 className="text-xl font-bold">Gerenciar Carrossel</h2>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex flex-col items-center gap-2 relative">
-
             <button
               onClick={() => handleDelete(i)}
-              className="absolute top-0 right-0 bg-red-600 text-white px-2 py-1 rounded-full text-xs hover:bg-red-700"
+              className="absolute top-2 right-4 bg-[#131413b2] text-white px-2 py-1 rounded-full text-xs hover:bg-[#131413] transition-all duration-300 cursor-pointer"
             >
               X
             </button>
 
-            <div className="w-32 h-32 border rounded-lg flex items-center justify-center bg-gray-100 overflow-hidden">
+            <div className="w-full h-[150px] border-[#131413] border-3 rounded-lg flex items-center justify-center bg-gray-100 overflow-hidden">
               {images[i] ? (
                 <img
                   src={images[i]}
@@ -108,8 +105,8 @@ const AddCarousel = () => {
               )}
             </div>
 
-            <label className="cursor-pointer bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
-              {loading ? "..." : `Escolher imagem ${i + 1}`}
+            <label className="cursor-pointer bg-[#131413] text-white px-3 py-2 rounded hover:bg-[#131413b2] transition-all duration-300">
+              { `Escolher imagem ${i + 1}`}
               <input
                 type="file"
                 className="hidden"
@@ -117,12 +114,9 @@ const AddCarousel = () => {
                 onChange={(e) => handleUpload(e.target.files[0], i)}
               />
             </label>
-
           </div>
         ))}
       </div>
-
-   
     </div>
   );
 };
