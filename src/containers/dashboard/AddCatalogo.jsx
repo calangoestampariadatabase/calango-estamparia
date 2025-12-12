@@ -1,322 +1,382 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function AddCatalogo() {
-  const blankItem = { name: "", category: "", images: [null, null, null] };
-
-  const [items, setItems] = useState([blankItem]);
+  const [items, setItems] = useState([]);
   const [modalIndex, setModalIndex] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const fileInputRef = useRef(null);
+  const fileInput = useRef(null);
 
-  // ============================================
-  // 1. CARREGAR ITENS DO BANCO
-  // ============================================
+  const MAX_ITEMS = 120;
+  const MAX_IMAGE_SIZE = 100 * 1024; // 100KB
+  const MAX_IMAGES = 3;
+
+  const CATEGORY_OPTIONS = [
+    "Canecas",
+    "Interclasse",
+    "Terceirão",
+    "Esportivo",
+    "Igreja",
+  ];
+
+  // ============================================================
+  // Carregar catalogo existente
+  // ============================================================
   useEffect(() => {
-    async function loadExisting() {
+    async function load() {
       const { data: catalogs } = await supabase
         .from("catalog")
         .select("id, name, category");
 
       if (!catalogs) return;
 
-      const { data: images } = await supabase
-        .from("catalog_images")
-        .select("catalog_id, url");
+      const mapped = catalogs.map((c) => ({
+        ...c,
+        existing: true,
+        images: [...Array(MAX_IMAGES)].map((_, i) => {
+          const { data } = supabase.storage
+            .from("catalog-images")
+            .getPublicUrl(`${c.id}/${i + 1}.jpg`);
+          return `${data.publicUrl}?r=${Date.now()}`;
+        }),
+      }));
 
-      const mapped = catalogs.map((cat) => {
-        const imgs =
-          images
-            ?.filter((img) => img.catalog_id === cat.id)
-            ?.map((x) => x.url) ?? [];
-
-        return {
-          id: cat.id,
-          name: cat.name,
-          category: cat.category,
-          images: [...imgs, null, null, null].slice(0, 3),
-          existing: true,
-        };
-      });
-
-      setItems((prev) => [...mapped, ...prev]);
+      setItems(mapped);
     }
 
-    loadExisting();
+    load();
   }, []);
 
-  // ============================================
-  // 2. ADICIONAR NOVO ITEM
-  // ============================================
-  function addNewItem() {
-    setItems((prev) => [...prev, { ...blankItem }]);
+  // ============================================================
+  // Criar novo item
+  // ============================================================
+  function addItem() {
+    if (items.length >= MAX_ITEMS) {
+      alert("Você atingiu o limite máximo de 120 itens.");
+      return;
+    }
+
+    setItems((prev) => [
+      ...prev,
+      {
+        id: null,
+        name: "",
+        category: "",
+        existing: false,
+        images: [...Array(MAX_IMAGES)].map(() => null),
+      },
+    ]);
   }
 
-  // ============================================
-  // 3. ABRIR MODAL
-  // ============================================
+  // ============================================================
+  // Abrir modal
+  // ============================================================
   function openModal(index) {
     setModalIndex(index);
-    setSelectedImageIndex(0);
   }
 
-  function handleChangeItemField(field, value) {
-    const updated = [...items];
-    updated[modalIndex][field] = value;
-    setItems(updated);
-  }
-
-  // ============================================
-  // 4. SELECIONAR IMAGEM AUTOMÁTICO
-  // ============================================
-  function triggerSelectFile(imgIndex) {
+  // ============================================================
+  // Seleção de arquivo
+  // ============================================================
+  function selectFile(imgIndex) {
     setSelectedImageIndex(imgIndex);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    fileInput.current?.click();
   }
 
-  function handleSelectFile(e) {
+  async function handleSelectFile(e) {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      alert("A imagem deve ter no máximo 100KB.");
+      return;
+    }
 
     const updated = [...items];
     updated[modalIndex].images[selectedImageIndex] = file;
     setItems(updated);
   }
 
-  function closeModal() {
-    setModalIndex(null);
-    setSelectedImageIndex(null);
-  }
-
-  // ============================================
-  // 5. SALVAR ITEM
-  // ============================================
-  async function handleSaveItem() {
-    const item = items[modalIndex];
-
-    if (!item.name.trim() || !item.category.trim()) {
-      alert("Preencha nome e categoria.");
-      return;
-    }
-
-    let catalogId = item.id;
-
-    // SE for novo item → cria no banco
-    if (!item.existing) {
-      const { data: catalog, error } = await supabase
-        .from("catalog")
-        .insert([{ name: item.name, category: item.category }])
-        .select()
-        .single();
-
-      if (error) {
-        alert("Erro ao criar catálogo!");
-        return;
-      }
-
-      catalogId = catalog.id;
-    }
-
-    // Upload das imagens
-    for (const img of item.images) {
-      if (!img) continue;
-      if (typeof img === "string") continue;
-
-      const path = `${catalogId}/${Date.now()}-${img.name}`;
-
-      await supabase.storage.from("catalog-images").upload(path, img);
-
-      const { data: url } = supabase.storage
-        .from("catalog-images")
-        .getPublicUrl(path);
-
-      await supabase.from("catalog_images").insert([
-        { catalog_id: catalogId, url: url.publicUrl },
-      ]);
-    }
-
-    alert("Item salvo!");
-    closeModal();
-  }
-
-  // ============================================
-  // 6. DELETAR ITEM COMPLETO
-  // ============================================
-  async function handleDeleteItem() {
+  // ============================================================
+  // Remover imagem individual
+  // ============================================================
+  async function removeImage(imgIndex) {
     const item = items[modalIndex];
 
     if (!item.id) {
-      // apenas remove localmente se ainda não existe no banco
-      const updated = items.filter((_, i) => i !== modalIndex);
+      const updated = [...items];
+      updated[modalIndex].images[imgIndex] = null;
       setItems(updated);
-      closeModal();
       return;
     }
 
-    if (!confirm("Tem certeza que deseja deletar este catálogo?")) return;
+    await supabase.storage
+      .from("catalog-images")
+      .remove([`${item.id}/${imgIndex + 1}.jpg`]);
 
-    // 1. pegar imagens do banco
-    const { data: imgs } = await supabase
-      .from("catalog_images")
-      .select("url")
-      .eq("catalog_id", item.id);
+    const { data } = supabase.storage
+      .from("catalog-images")
+      .getPublicUrl(`${item.id}/${imgIndex + 1}.jpg`);
 
-    // 2. remover arquivos do bucket
-    if (imgs && imgs.length > 0) {
-      const paths = imgs.map((img) => {
-        const path = img.url.split("/catalog-images/")[1];
-        return path;
-      });
-
-      await supabase.storage.from("catalog-images").remove(paths);
-    }
-
-    // 3. deletar catalog_images
-    await supabase.from("catalog_images").delete().eq("catalog_id", item.id);
-
-    // 4. deletar o catálogo
-    await supabase.from("catalog").delete().eq("id", item.id);
-
-    // 5. remover da UI
-    const updated = items.filter((_, i) => i !== modalIndex);
+    const updated = [...items];
+    updated[modalIndex].images[imgIndex] = `${data.publicUrl}?r=${Date.now()}`;
     setItems(updated);
-
-    closeModal();
   }
 
-  // ============================================
-  // 7. UI
-  // ============================================
+  // ============================================================
+  // Salvar item
+  // ============================================================
+  async function saveItem() {
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    const item = items[modalIndex];
+
+    if (!item.name.trim() || !item.category.trim()) {
+      alert("Preencha o nome e a categoria.");
+      setIsSaving(false);
+      return;
+    }
+
+    let id = item.id;
+
+    try {
+      // Criar novo item
+      if (!item.existing) {
+        const { data, error } = await supabase
+          .from("catalog")
+          .insert([{ name: item.name, category: item.category }])
+          .select()
+          .single();
+
+        if (error) throw new Error("Erro ao criar item.");
+
+        id = data.id;
+
+        const updated = [...items];
+        updated[modalIndex].id = id;
+        updated[modalIndex].existing = true;
+        setItems(updated);
+      }
+
+      // Upload das imagens
+      for (let i = 0; i < MAX_IMAGES; i++) {
+        const img = item.images[i];
+
+        if (!img || typeof img === "string") continue;
+
+        await supabase.storage
+          .from("catalog-images")
+          .upload(`${id}/${i + 1}.jpg`, img, { upsert: true });
+
+        const { data } = supabase.storage
+          .from("catalog-images")
+          .getPublicUrl(`${id}/${i + 1}.jpg`);
+
+        const updated = [...items];
+        updated[modalIndex].images[i] = `${data.publicUrl}?r=${Date.now()}`;
+        setItems(updated);
+      }
+
+      alert("Item salvo!");
+      setModalIndex(null);
+    } catch (err) {
+      alert(err.message || "Erro ao salvar item.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  // ============================================================
+  // Deletar item
+  // ============================================================
+  async function deleteItem() {
+    const item = items[modalIndex];
+
+    if (!item.id) {
+      setItems(items.filter((_, i) => i !== modalIndex));
+      setModalIndex(null);
+      return;
+    }
+
+    if (!confirm("Tem certeza que deseja excluir?")) return;
+
+    await supabase.storage.from("catalog-images").remove([
+      `${item.id}/1.jpg`,
+      `${item.id}/2.jpg`,
+      `${item.id}/3.jpg`,
+    ]);
+
+    await supabase.from("catalog").delete().eq("id", item.id);
+
+    setItems(items.filter((_, i) => i !== modalIndex));
+    setModalIndex(null);
+  }
+
+  // ============================================================
+  // UI
+  // ============================================================
   return (
-    <div className="p-6 space-y-4">
-      <h2 className="text-xl font-bold">Catálogo</h2>
+    <div className="p-6 space-y-5">
+      <h1 className="text-xl font-bold">Catálogo</h1>
 
-      <div className="grid grid-cols-5 gap-6">
-        {items.map((item, i) => {
-          const thumb = item.images[0];
+      <div className="grid grid-cols-5 gap-5">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            onClick={() => openModal(i)}
+            className="cursor-pointer relative"
+          >
+            <div className="absolute top-1 left-1 bg-white px-1 rounded text-xs">
+              {item.id ? item.id.slice(0, 8) : "novo"}
+            </div>
 
-          return (
-            <div
-              key={i}
-              onClick={() => openModal(i)}
-              className="w-28 h-28 border rounded-lg bg-gray-100 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-blue-500"
-            >
-              {thumb ? (
-                typeof thumb === "string" ? (
-                  <img
-                    src={thumb}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
+            <div className="w-28 h-28 border rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden hover:ring-2 hover:ring-blue-500">
+              {item.images[0] ? (
+                typeof item.images[0] === "string" ? (
+                  <img src={item.images[0]} className="object-cover w-full h-full" />
                 ) : (
                   <img
-                    src={URL.createObjectURL(thumb)}
-                    className="w-full h-full object-cover rounded-lg"
+                    src={URL.createObjectURL(item.images[0])}
+                    className="object-cover w-full h-full"
                   />
                 )
               ) : (
                 <span className="text-3xl text-gray-400">+</span>
               )}
             </div>
-          );
-        })}
+          </div>
+        ))}
 
-        {/* novo item */}
         <button
-          onClick={addNewItem}
-          className="w-28 h-28 border border-black text-4xl rounded-lg hover:bg-gray-100 flex items-center justify-center"
+          onClick={addItem}
+          className="w-28 h-28 border border-black rounded-lg flex items-center justify-center text-3xl hover:bg-gray-200"
         >
           +
         </button>
       </div>
 
-      {/* MODAL */}
+      {/* Modal */}
       {modalIndex !== null && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 space-y-4">
-            <h3 className="text-lg font-bold">Editar Item</h3>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl w-[400px] space-y-4 shadow-xl">
+            <h2 className="text-lg font-bold">Editar Item</h2>
+
+            <input
+              className="w-full border p-2 rounded bg-gray-100"
+              value={items[modalIndex].id ?? ""}
+              readOnly
+              placeholder="ID será gerado"
+            />
 
             <input
               type="text"
-              className="w-full border p-2 rounded"
               placeholder="Nome"
-              value={items[modalIndex].name}
-              onChange={(e) =>
-                handleChangeItemField("name", e.target.value)
-              }
-            />
-
-            <input
-              type="text"
               className="w-full border p-2 rounded"
-              placeholder="Categoria"
-              value={items[modalIndex].category}
-              onChange={(e) =>
-                handleChangeItemField("category", e.target.value)
-              }
+              value={items[modalIndex].name}
+              onChange={(e) => {
+                const updated = [...items];
+                updated[modalIndex].name = e.target.value;
+                setItems(updated);
+              }}
             />
 
-            <div className="grid grid-cols-3 gap-2">
-              {items[modalIndex].images.map((img, imgIndex) => (
-                <div
-                  key={imgIndex}
-                  onClick={() => triggerSelectFile(imgIndex)}
-                  className="w-20 h-20 border rounded bg-gray-100 cursor-pointer overflow-hidden flex items-center justify-center"
-                >
-                  {img ? (
-                    typeof img === "string" ? (
-                      <img src={img} className="w-full h-full object-cover" />
+            {/* SELECT DE CATEGORIA */}
+            <select
+              className="w-full border p-2 rounded"
+              value={items[modalIndex].category}
+              onChange={(e) => {
+                const updated = [...items];
+                updated[modalIndex].category = e.target.value;
+                setItems(updated);
+              }}
+            >
+              <option value="">Selecione uma categoria</option>
+              {CATEGORY_OPTIONS.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
+            {/* Imagens */}
+            <div className="grid grid-cols-3 gap-3">
+              {items[modalIndex].images.map((img, idx) => (
+                <div key={idx} className="relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(idx);
+                    }}
+                    className="absolute top-0 right-0 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                  >
+                    ✕
+                  </button>
+
+                  <div
+                    onClick={() => selectFile(idx)}
+                    className="w-24 h-24 border rounded bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer"
+                  >
+                    {img ? (
+                      typeof img === "string" ? (
+                        <img src={img} className="object-cover w-full h-full" />
+                      ) : (
+                        <img
+                          src={URL.createObjectURL(img)}
+                          className="object-cover w-full h-full"
+                        />
+                      )
                     ) : (
-                      <img
-                        src={URL.createObjectURL(img)}
-                        className="w-full h-full object-cover"
-                      />
-                    )
-                  ) : (
-                    <span className="text-gray-400">+</span>
-                  )}
+                      <span className="text-gray-400">+</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
             <input
+              ref={fileInput}
               type="file"
               accept="image/*"
-              ref={fileInputRef}
               onChange={handleSelectFile}
               className="hidden"
             />
 
             <div className="flex justify-between pt-3">
-              {/* BOTÃO DE DELETAR */}
               <button
-                onClick={handleDeleteItem}
-                className="px-4 py-1 bg-red-600 text-white rounded"
+                onClick={deleteItem}
+                className="px-4 py-2 bg-red-600 text-white rounded"
               >
-                Apagar
+                Excluir
               </button>
 
               <div className="flex gap-2">
                 <button
-                  onClick={closeModal}
-                  className="px-4 py-1 bg-gray-300 rounded"
+                  onClick={() => setModalIndex(null)}
+                  className="px-4 py-2 bg-gray-200 rounded"
                 >
                   Fechar
                 </button>
 
-                <button
-                  onClick={handleSaveItem}
-                  className="px-4 py-1 bg-green-600 text-white rounded"
+                  <button
+                  onClick={saveItem}
+                  disabled={isSaving}
+                  className={`px-4 py-2 rounded text-white ${
+                    isSaving
+                      ? "bg-green-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
                 >
-                  Salvar
+                  {isSaving ? "Salvando..." : "Salvar"}
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       )}
