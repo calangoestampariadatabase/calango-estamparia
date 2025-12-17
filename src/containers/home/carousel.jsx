@@ -55,12 +55,12 @@ const Carousel = () => {
   };
 
   return (
-    <div className="px-[65px]">
-      <div className="flex items-center justify-center absolute h-[100px]">
-        <img src="/assets/icon.png" />
+    <div className="px-2 md:px-[65px]">
+      <div className="flex items-center justify-center absolute md:h-[100px]">
+        <img className="md:h-auto h-[30px]" src="/assets/icon.png" />
       </div>
 
-      <div className="relative z-[2] w-full h-[528px]">
+      <div className="relative z-[2] h-[160px] w-full  md:h-[528px]">
         <img
           src="/assets/border.png"
           className="absolute z-[2] top-0 left-0 w-full h-full pointer-events-none"
@@ -83,7 +83,7 @@ const Carousel = () => {
               <img
                 src={item.image}
                 alt="banner"
-                className="w-full h-[528px] object-cover"
+                className="w-full h-[160px] md:h-[528px] object-cover"
                 style={{
                   WebkitMaskImage: "url(/assets/retangulo.png)",
                   WebkitMaskRepeat: "no-repeat",

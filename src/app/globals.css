@@ -19,3 +19,40 @@ body {
   outline: none !important;
   border: none !important;
 }
+
+.card-slider .slick-prev {
+  left: 8px;
+}
+
+.card-slider .slick-next {
+  right: 8px;
+}
+
+.card-slider .slick-prev,
+.card-slider .slick-next {
+  z-index: 20;
+}
+
+.modal-slider .slick-prev,
+.modal-slider .slick-next {
+  z-index: 30;
+  width: 40px;
+  height: 40px;
+}
+
+.modal-slider .slick-prev {
+  left: 10px;
+}
+
+.modal-slider .slick-next {
+  right: 10px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
