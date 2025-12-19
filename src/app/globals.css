@@ -56,3 +56,23 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.bounded {
+  font-family: var(--font-bounded);
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+.animate-fade {
+  animation: fade 1.4s ease-in-out infinite;
+}

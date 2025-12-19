@@ -6,7 +6,7 @@ const catalogo = () => {
   return (
     <Container>
       <Header />
-      <div className="  pt-20 bg-[#3BCF41] rounded-[70px]">
+      <div className=" pt-10 md:pt-20 bg-[#3BCF41] rounded-[20px] md:rounded-[70px]">
         <CatalogoHeader />
       </div>
       <p className="text-[18px] text-[#3BCF41] text-center py-20 font-normal">

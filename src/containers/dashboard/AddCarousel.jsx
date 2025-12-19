@@ -3,15 +3,17 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import AddCatalogo from "./AddCatalogo";
 
+const TOTAL_SLOTS = 5;
+
 const AddCarousel = () => {
-  const [images, setImages] = useState([null, null, null]);
+  const [images, setImages] = useState(Array(TOTAL_SLOTS).fill(null));
   const [loading, setLoading] = useState(false);
 
   // Carrega imagens existentes
   const loadImages = async () => {
-    const newImages = [];
+    const newImages = Array(TOTAL_SLOTS).fill(null);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
       const filePath = `slot${i + 1}.jpg`;
 
       const { data: listed } = await supabase.storage
@@ -23,10 +25,8 @@ const AddCarousel = () => {
           .from("carousel")
           .getPublicUrl(filePath);
 
-        // Sempre força o browser a recarregar versão atual usando timestamp único
+        // força reload (anti-cache)
         newImages[i] = `${data.publicUrl}?refresh=${Date.now()}`;
-      } else {
-        newImages[i] = null;
       }
     }
 
@@ -54,7 +54,6 @@ const AddCarousel = () => {
       return;
     }
 
-    // Gera URL SEM cache usando timestamp novo
     const { data } = supabase.storage.from("carousel").getPublicUrl(filePath);
 
     const newImages = [...images];
@@ -80,15 +79,16 @@ const AddCarousel = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 ">
+    <div className="flex flex-col gap-4">
       <h2 className="text-xl font-bold">Gerenciar Carrossel</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[0, 1, 2].map((i) => (
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        {Array.from({ length: TOTAL_SLOTS }).map((_, i) => (
           <div key={i} className="flex flex-col items-center gap-2 relative">
             <button
               onClick={() => handleDelete(i)}
-              className="absolute top-2 right-4 bg-[#131413b2] text-white px-2 py-1 rounded-full text-xs hover:bg-[#131413] transition-all duration-300 cursor-pointer"
+              disabled={loading}
+              className="absolute top-2 right-2 bg-[#131413b2] text-white px-2 py-1 rounded-full text-xs hover:bg-[#131413] transition-all duration-300"
             >
               X
             </button>
@@ -106,7 +106,7 @@ const AddCarousel = () => {
             </div>
 
             <label className="cursor-pointer bg-[#131413] text-white px-3 py-2 rounded hover:bg-[#131413b2] transition-all duration-300">
-              { `Escolher imagem ${i + 1}`}
+              {`Escolher imagem ${i + 1}`}
               <input
                 type="file"
                 className="hidden"

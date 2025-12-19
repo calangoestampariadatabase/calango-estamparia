@@ -5,31 +5,31 @@ import { useState } from "react";
 const Faq = () => {
   const faqs = [
     {
-      question: "Como faço para personalizar meus produtos?",
+      question: "Faz envio para todo o Brasil?",
       answer:
-        "Você pode personalizar seus produtos através do nosso site, escolhendo entre diversas opções de design, cores e tamanhos.",
+        "Sim!! Fazemos envio para todo território nacional.",
     },
     {
-      question: "Como faço para personalizar meus produtos?",
+      question: "Qual a forma de pagamento? Aceita cartão?",
       answer:
-        "Você pode personalizar seus produtos através do nosso site, escolhendo entre diversas opções de design, cores e tamanhos.",
+        "Aceitamos Pix, Cartão de crédito, Transferência Bancária e Boleto.\n\nO pagamento pode ser feito em duas vezes: 50% do valor total para o pedido entrar em produção e o restante quando o pedido estiver pronto para o envio. O pedido é enviado após o pagamento total do pedido.\n\nLembrando que o pagamento será feito por apenas uma pessoa, que fica responsável por recolher o valor dos colegas e acertar com a empresa.",
     },
     {
-      question: "Como faço para personalizar meus produtos?",
+      question: "Como faço um orçamento?",
       answer:
-        "Você pode personalizar seus produtos através do nosso site, escolhendo entre diversas opções de design, cores e tamanhos.",
+        "Entre em contato com a gente através do nosso canal de atendimento e solicite um orçamento personalizado!!",
     },
     {
-      question: "Como faço para personalizar meus produtos?",
+      question: "Qual o prazo de entrega?",
       answer:
-        "Você pode personalizar seus produtos através do nosso site, escolhendo entre diversas opções de design, cores e tamanhos.",
+        "O prazo varia entre 20 a 35 dias úteis dependendo da época do ano, podendo ser antes ou depois. Consulte nosso time de atendimento.",
     },
     {
-      question: "Como faço para personalizar meus produtos?",
+      question: "Não serviu meu uniforme, posso trocar?",
       answer:
-        "Você pode personalizar seus produtos através do nosso site, escolhendo entre diversas opções de design, cores e tamanhos.",
+        "Não é possível efetuar troca ou devolução de produto personalizado, pois não é possível revender ou reutilizar.",
     },
-  ];
+  ];  
 
   const [open, setOpen] = useState(null);
 
@@ -38,10 +38,10 @@ const Faq = () => {
   };
 
   return (
-    <div className="px-[20px] md:px-[40px] lg:px-[65px] py-[120px] md:py-[160px] lg:py-40 flex flex-col lg:flex-row justify-between items-center w-full relative gap-20">
+    <div id="faq" className=" px-[20px] md:px-[40px] lg:px-[65px] py-[50px] md:py-[160px] lg:py-40 flex flex-col lg:flex-row justify-between items-center w-full relative gap-20">
       {/* Conteúdo */}
       <div className="w-full lg:w-[60%]">
-        <p className="text-[22px] md:text-[25px] lg:text-[28px] w-full lg:w-[900px] mb-12 lg:mb-20">
+        <p className="text-[13px] md:text-[25px] lg:text-[28px] w-full lg:w-[900px] mb-12 lg:mb-20 bounded">
           VOCÊ PERGUNTA, A CALANGO RESPONDE!
         </p>
 
@@ -49,10 +49,10 @@ const Faq = () => {
           {faqs.map((faq, index) => (
             <li
               key={index}
-              className="my-8 md:my-10 cursor-pointer"
+              className="my-5 md:my-10 cursor-pointer"
               onClick={() => openFaq(index)}
             >
-              <p className="text-[18px] md:text-[22px] lg:text-[24px] font-medium">
+              <p className="text-[13px] md:text-[22px] lg:text-[24px] font-medium">
                 <span className="mr-6 md:mr-10 font-bold text-[#1F9223]">
                   {open === index ? "-" : "+"}
                 </span>
@@ -64,7 +64,7 @@ const Faq = () => {
                   open === index ? "max-h-40 mt-4" : "max-h-0"
                 }`}
               >
-                <p className="font-normal text-[16px] md:text-[18px] lg:text-[20px] border-b border-[#1F9223] pb-6 md:pb-10">
+                <p className="font-normal text-[13px] md:text-[18px] lg:text-[20px] border-b border-[#1F9223] pb-6 md:pb-10">
                   {faq.answer}
                 </p>
               </div>
@@ -75,7 +75,7 @@ const Faq = () => {
 
       {/* Imagem */}
       <img
-        className="h-[220px] md:h-[300px] lg:h-[350px]"
+        className="h-[100px] md:h-[300px] lg:h-[350px]"
         src="/assets/faq.png"
         alt=""
       />

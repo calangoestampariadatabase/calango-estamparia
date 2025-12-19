@@ -13,7 +13,7 @@ const ProductsDetailPage = async ({ params }) => {
         <div className="overflow-x-hidden">
             <Container>
                 <Header />
-                <div className="  pt-20 bg-[#3BCF41] rounded-[70px] pb-20">
+                <div className=" py-10 md:pt-20 bg-[#3BCF41] rounded-[25px] md:pb-20 md:rounded-[70px]">
                     <ProductDetail products={products} />
                     <ProductFooter   />
                 </div>

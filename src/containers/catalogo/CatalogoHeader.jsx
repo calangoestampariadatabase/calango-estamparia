@@ -16,6 +16,7 @@ import { LiaUniversitySolid } from "react-icons/lia";
 /* Slick */
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import PageLoader from "@/components/pageLoader";
 
 const categorias = [
   { nome: "Todos", icon: <FaBoxOpen /> },
@@ -139,16 +140,19 @@ export default function CatalogoSection() {
     my-6
     ${
       categoriaAtiva === cat.nome
-        ? "text-[#131413]"
-        : "text-[#13141338]"
+        ? "text-[#3BCF41]"
+        : "text-[#131413] "
     }
   `}
 >
 
-            <div className="text-4xl p-5 rounded-full border-2 mb-2">
+            <div className={`text-4xl p-5 rounded-full border-2 mb-2 ${
+      categoriaAtiva === cat.nome? "bg-[#131413]"
+        : "bg-[#3BCF41] "
+    }`}>
               {cat.icon}
             </div>
-            <span className="text-sm">{cat.nome}</span>
+            <span className="text-sm text-[#131413] ">{cat.nome}</span>
           </li>
         ))}
       </ul>
@@ -165,14 +169,14 @@ export default function CatalogoSection() {
 "
       >
         {loading ? (
-          <p>Carregando...</p>
+          <PageLoader />
         ) : filtrados.length === 0 ? (
-          <p>Nenhum produto encontrado.</p>
+        <div className="w-full h-full flex items-center justify-center">Nenhum produto encontrado.</div>  
         ) : (
           filtrados.map((item) => (
             <div
               key={item.id}
-              className="group rounded-xl overflow-hidden cursor-pointer"
+              className="group rounded-xl overflow-hidden cursor-pointer px-2 md:px-0"
             >
               {/* CAROUSEL DO CARD */}
               <Slider {...cardSliderSettings}>
@@ -215,60 +219,96 @@ export default function CatalogoSection() {
       </div>
 
       {/* MODAL */}
-      {modalItem && (
-        <div
-          className="fixed inset-0 bg-[#000000cc] flex items-center justify-center z-50"
-          onClick={() => setModalItem(null)}
-        >
-          <div
-            className="bg-[#3BCF41] rounded-xl max-w-4xl w-full mx-4 overflow-hidden relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setModalItem(null)}
-              className="text-xl font-bold absolute top-5 right-5"
-            >
-              ✕
-            </button>
+    {modalItem && (
+  <div
+    className="fixed inset-0 bg-[#000000cc] flex items-center justify-center z-50 px-4"
+    onClick={() => setModalItem(null)}
+  >
+    <div
+      className="
+        bg-[#3BCF41]
+        rounded-2xl
+        w-full
+        max-w-5xl
+        max-h-[90vh]
+        overflow-y-auto
+        relative
+      "
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* FECHAR */}
+      <button
+        onClick={() => setModalItem(null)}
+        className="
+          absolute
+          top-4
+          right-4
+          text-lg
+          font-bold
+          bg-[#131413]
+          text-[#3BCF41]
+          w-8
+          h-8
+          rounded-full
+          flex
+          items-center
+          justify-center
+          hover:scale-105
+          transition
+        "
+      >
+        ✕
+      </button>
 
-            <div className="p-6 flex gap-6">
-              {/* CAROUSEL */}
-              <div className="w-[600px] shrink-0 relative">
-                <Slider {...modalSliderSettings}>
-                  {modalItem.images.map((img, i) => (
-                    <div
-                      key={i}
-                      className="h-[600px]  flex items-center justify-center"
-                    >
-                      <img src={img} className="h-full w-full " alt="" />
-                    </div>
-                  ))}
-                </Slider>
+      <div className="p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+        {/* CAROUSEL */}
+        <div className="w-full lg:w-[520px] shrink-0">
+          <Slider {...modalSliderSettings}>
+            {modalItem.images.map((img, i) => (
+              <div
+                key={i}
+                className="
+                  h-[280px]
+                  sm:h-[360px]
+                  lg:h-[500px]
+                  rounded-xl
+                  overflow-hidden
+                "
+              >
+                <img
+                  src={img}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
               </div>
-
-              <div className="flex-1 flex flex-col gap-4">
-                <div className=" flex flex-col  gap-4">
-                  {categoria && (
-                    <div className="flex items-center gap-2 text-[#131413]">
-                      <span className="text-2xl">{categoria.icon}</span>
-                      <span className="text-lg font-semibold">
-                        {categoria.nome}
-                      </span>
-                    </div>
-                  )}
-                  <p className="text-2xl font-bold text-[#131413]">
-                    {modalItem.name}
-                  </p>
-
-                  <div className="w-[100px] text-center bg-[#131413] text-sm px-3 py-1 rounded-lg text-[#3BCF41] font-bold">
-                    {modalItem.id}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            ))}
+          </Slider>
         </div>
-      )}
+
+        {/* INFOS */}
+        <div className="flex-1 flex flex-col gap-4">
+          {categoria && (
+            <div className="flex items-center gap-2 text-[#131413]">
+              <span className="text-xl">{categoria.icon}</span>
+              <span className="text-base font-semibold">
+                {categoria.nome}
+              </span>
+            </div>
+          )}
+
+          <p className="text-xl md:text-2xl font-bold text-[#131413] leading-tight">
+            {modalItem.name}
+          </p>
+
+          <div className="w-fit bg-[#131413] text-xs px-3 py-1 rounded-md text-[#3BCF41] font-bold">
+            {modalItem.id}
+          </div>  
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
     </section>
   );
 }

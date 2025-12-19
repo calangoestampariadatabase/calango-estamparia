@@ -11,7 +11,7 @@ export default function AddCatalogo() {
 
   const fileInput = useRef(null);
 
-  const MAX_ITEMS = 120;
+  const MAX_ITEMS = 200;
   const MAX_IMAGE_SIZE = 180 * 1024;
   const MAX_IMAGES = 3;
 
