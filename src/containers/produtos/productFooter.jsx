@@ -48,7 +48,7 @@ const ProductFooter = () => {
           <div className="bg-[#3bcf4088] absolute inset-0 rounded-[32px] md:rounded-[40px]"></div>
           <img
             className="w-full h-full rounded-[32px] md:rounded-[40px] object-cover"
-            src={products.images[0].image}
+            src={products.pb}
             alt=""
           />
         </div>

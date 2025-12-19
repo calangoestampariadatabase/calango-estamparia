@@ -45,7 +45,8 @@ const ProductDetail = ({ products }) => {
             {products.faq.map((item, index) => (
               <li
                 key={index}
-                className="
+                className={`
+                  ${!products.download ? "md:pb-10" : "md:pb-0"}
                   my-3 md:my-7
                   cursor-pointer
                   bg-[#131413]
@@ -54,8 +55,8 @@ const ProductDetail = ({ products }) => {
                   p-3
                   w-full
                   relative
-                  text-center
-                "
+                  text-center`
+                }
                 onClick={() => setOpen(open === index ? null : index)}
               >
                 <p className="text-[15px] md:text-[24px] font-semibold">
@@ -77,17 +78,25 @@ const ProductDetail = ({ products }) => {
               </li>
             ))}
 
+            {/* BOTÃO ORÇAMENTO */}
             <li className="mt-12">
               <button className="text-[18px] md:text-[24px] font-semibold text-[#131413] bg-[#3BCF41] rounded-[30px] md:rounded-[40px] p-3 w-full">
                 Faça seu orçamento!
               </button>
             </li>
 
-            <li className="w-full text-center mt-5">
-              <a className="underline text-[12px] md:text-[20px]" href="">
-                Baixar tabela de medidas
-              </a>
-            </li>
+            {/* DOWNLOAD TABELA DE MEDIDAS (SÓ SE EXISTIR) */}
+            {products.download && (
+              <li className="w-full text-center mt-5">
+                <a
+                  href={products.download}
+                  download
+                  className="underline text-[12px] md:text-[20px]"
+                >
+                  Baixar tabela de medidas
+                </a>
+              </li>
+            )}
           </ul>
 
           {/* IMAGENS */}

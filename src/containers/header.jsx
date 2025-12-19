@@ -25,8 +25,8 @@ const Header = () => {
 
   const redes = [
     { icon: <FaInstagram />, href: "https://www.instagram.com/calangoestamparia.ofc/" },
-    { icon: <FaPinterest />, href: "https://www.tiktok.com/@calangoestamparia.ofc" },
-    { icon: <FaTiktok />, href: "" },
+    { icon: <FaPinterest />, href: "" },
+    { icon: <FaTiktok />, href: "https://www.tiktok.com/@calangoestamparia.ofc" },
   ];
 
   const isActive = (href) => {

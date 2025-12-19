@@ -3,6 +3,8 @@ import Link from "next/link";
 export const items = [
   {
     name: "moletons",
+    pb: "/images/moletons/pb.jpg",
+    download: "/tabela-medidas-moletom.pdf",
     images: [
       {
         image: "/images/moletons/moletom1.jpg",
@@ -41,6 +43,8 @@ export const items = [
   },
   {
     name: "camisas",
+    download: "/tabela-medidas-camisas.pdf",
+    pb: "/images/camisas/pb.jpg",
     images: [
       {
         image: "/images/camisas/camisas1.jpg",
@@ -79,8 +83,9 @@ export const items = [
   },
   {
     name: "canecas",
+    pb: "/images/canecas/pb.jpg",
     images: [
-        {
+      {
         image: "/images/canecas/caneca1.jpg",
       },
       {
