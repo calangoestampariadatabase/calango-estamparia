@@ -24,7 +24,7 @@ const AboutUs = () => {
          <h1 className="md:hidden pt-5 block font-bold text-[18px] text-center">PRAZER, SOMOS A CALANGO®</h1>
         <img
           className="mt-[30px] md:mt-0 mx-auto md:mx-0 relative z-[5] border-[3px] h-[330px] w-[275px] md:h-[600px] md:w-[500px] object-cover rounded-[40px] border-[#131413] md:border-[10px]"
-          src="/images/about.jpg"
+          src="/images/about.png"
           alt=""
         />
 
