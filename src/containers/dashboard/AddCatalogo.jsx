@@ -8,7 +8,7 @@ export default function AddCatalogo() {
   const [modalIndex, setModalIndex] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const MAX_ITEMS = 300;
+  const MAX_ITEMS = 600;
   const MAX_IMAGES = 3;
 
   const CATEGORY_OPTIONS = [
@@ -53,7 +53,7 @@ export default function AddCatalogo() {
   // ============================================================
   function addItem() {
     if (items.length >= MAX_ITEMS) {
-      alert("Você atingiu o limite máximo de 200 itens.");
+      alert("Você atingiu o limite máximo de 600 itens.");
       return;
     }
 
