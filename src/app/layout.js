@@ -57,6 +57,29 @@ export default function RootLayout({ children }) {
       <body
         className={`${fontPoppins.variable} ${Bounded.variable} antialiased`}
       >
+        <Script
+          id="tintim-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(window, document, script) {
+                if (!window.tt) {
+                  window.tt = window.tt || {};
+
+                  var c = document.getElementsByTagName('head')[0];
+                  var k = document.createElement('script');
+                  k.async = 1;
+                  k.src = script;
+                  c.appendChild(k);
+                }
+
+                window.tt.accountCode = '11059be2-0410-4b61-8aae-918b6f3b5322';
+
+              })(window, document, '//s.tintim.app/static/core/tintim-1.0.js');
+            `,
+          }}
+        />
+
         {/* GTM noscript */}
         <noscript>
           <iframe
